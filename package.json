@@ -9,7 +9,8 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "persona5sucks": "./index.js"
+    "persona5sucks": "./index.js",
+    "kss": "./index.js"
   },
   "dependencies": {
     "commander": "^2.15.1",

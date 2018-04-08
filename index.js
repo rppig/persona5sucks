@@ -85,7 +85,7 @@ async function runTest() {
   await getSSHConnection(credentials);
   console.log('Patience you must have, my young Padawan.');
   let result = await ssh.execCommand("/tmp/my_web_test.sh")
-
+  console.log(result.stdout);
   process.exit();
 }
 
