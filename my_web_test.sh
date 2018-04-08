@@ -65,7 +65,7 @@ start_webtest(){
 			sleep 2
 			result=`curl -o /dev/null -s -w %{time_total} --connect-timeout 5 --socks5-hostname 127.0.0.1:23458 https://www.google.com/`
 			# result=`curl -o /dev/null -s -w %{time_connect}:%{time_starttransfer}:%{time_total}:%{speed_download} --socks5-hostname 127.0.0.1:23456 https://www.google.com/`
-			echo $array1 $result
+			echo 'node'$nu ':' $array1 $result
 			if [ $result \< $my_best_node_delay ]
 			then
 				my_best_node=$nu
@@ -80,7 +80,7 @@ start_webtest(){
 			ss-local -b 0.0.0.0 -l 23458 -s $array1 -p $array2 -k $array3 -m $array4 -u $ARG_OTA $ARG_OBFS -f /var/run/sslocal3.pid >/dev/null 2>&1
 			sleep 2
 			result=`curl -o /dev/null -s -w %{time_total} --connect-timeout 5 --socks5-hostname 127.0.0.1:23458 https://www.google.com/`
-			echo $array1 $result
+			echo 'node'$nu ':' $array1 $result
 			if [ $result \< $my_best_node_delay ]
 			then
 				my_best_node=$nu
@@ -98,6 +98,39 @@ start_webtest(){
 }
 
 # start testing
+
+onlyList=`dbus get ssconf_only_list_node`
+if [ $onlyList == "true" ];then
+	dbus set ssconf_only_list_node='false'
+	dbus list ssconf_basic_server | sort -n -t "_" -k 4|cut -d "_" -f 4
+	exit
+fi
+
+nodeId=`dbus get ssconf_use_node`
+if [ $nodeId == "false" ];then
+	echo ''
+else
+	if [ $nodeId ];then
+		echo 'start switching to node' $nodeId
+		nodeIp=$(dbus get ssconf_basic_server_$nodeId)
+		nodePort=$(dbus get ssconf_basic_port_$nodeId)
+		nodePassword=$(dbus get ssconf_basic_password_$nodeId)
+		nodeMethod=$(dbus get ssconf_basic_method_$nodeId)
+		nodeOTA=$(dbus get ssconf_basic_onetime_auth_$nodeId)
+		dbus set ssconf_use_node='false'
+		dbus set ss_basic_server=$nodeIp
+		dbus set ss_basic_port=$nodePort
+		dbus set ss_basic_password=$nodePassword
+		dbus set ss_basic_method=$nodeMethod
+		dbus set ss_basic_onetime_auth=$nodeOTA
+		dbus set ssconf_basic_node=$nodeId
+		sh /koolshare/ss/ssconfig.sh restart
+	else
+		echo 'invalid ss node'
+	fi
+	exit
+fi
+
 if [ "$ssconf_basic_test_node" != "0" ];then
 	nu="$ssconf_basic_test_node"
 	start_webtest

@@ -9,8 +9,18 @@ program.version("0.1.0");
 
 program
   .command("list")
-  .description("List all your servers with respond time and download speed")
+  .description("List all your ss nodes")
   .action(listServers);
+
+program
+  .command("use")
+  .description("List all your ss nodes")
+  .action(switchNode);
+
+program
+  .command("test")
+  .description("List all your ss nodes with curl speed. It may take a lot of time.")
+  .action(runTest);
 
 program
   .command("reset")
@@ -32,12 +42,49 @@ function nullCheck(val) {
   return true;
 }
 
+function numberCheck(val) {
+  if (!val || !parseInt(val)) {
+    return "Please enter valid number;";
+  }
+
+  return true;
+}
+
 async function listServers() {
   let credentials = await getCredentials();
   await getSSHConnection(credentials);
 
-  let result = await ssh.execCommand("dbus list ssconf_basic_server")
+  await ssh.execCommand("dbus set ssconf_only_list_node='true'")
+  let result = await ssh.execCommand("/tmp/my_web_test.sh")
   console.log(result.stdout);
+
+  process.exit();
+}
+
+async function switchNode() {
+  let initQuestions = [{
+    type: "input",
+    name: "node",
+    message: "Which node do you want to use",
+    validate: numberCheck
+  }];
+
+  let answers = await inquirer.prompt(initQuestions);
+  let credentials = await getCredentials();
+  await getSSHConnection(credentials);
+  console.log('start...')
+  await ssh.execCommand("dbus set ssconf_use_node="+answers.node)
+  let result = await ssh.execCommand("/tmp/my_web_test.sh")
+  console.log(result.stdout);
+
+  process.exit();
+}
+
+async function runTest() {
+  let credentials = await getCredentials();
+  await getSSHConnection(credentials);
+  console.log('Patience you must have, my young Padawan.');
+  let result = await ssh.execCommand("/tmp/my_web_test.sh")
 
   process.exit();
 }
