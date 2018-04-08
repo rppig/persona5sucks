@@ -1,5 +1,5 @@
 {
-  "name": "persona5sucks",
+  "name": "kss",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,6 +11,10 @@
   "bin": {
     "persona5sucks": "./index.js",
     "kss": "./index.js"
+  },
+  "pkg": {
+    "output": "./bin/"
+
   },
   "dependencies": {
     "commander": "^2.15.1",
